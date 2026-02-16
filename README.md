@@ -1,63 +1,63 @@
 # IoT Doctor
 
-A security diagnostic and educational tool for home IoT devices.
+家庭用IoTデバイスのためのセキュリティ診断・教育ツール。
 
-> **KOSEN Programming Contest - Open Category**
+> **高専プロコン - 自由部門**
 
-## Overview
+## 概要
 
-IoT Doctor enables general household users to understand the security status of their IoT devices without specialized knowledge and take concrete remediation actions.
+IoT Doctorは、専門的な知識がなくても、一般家庭のユーザーが自宅のIoTデバイスのセキュリティ状態を理解し、具体的な改善策を実行できるようにするためのツールです。
 
-### Key Features
+### 主な機能
 
-- **Network Scan** - Auto-detect devices on local network
-- **Device Identification** - Identify vendor/model from MAC address and fingerprint
-- **Vulnerability Check** - Detect default passwords, open ports, outdated firmware
-- **Security Score** - Visualize overall safety as 0-100 score
-- **Japanese Report** - Easy-to-understand results without jargon
-- **Remediation Guide** - Step-by-step fix instructions per issue
+- **ネットワークスキャン** - ローカルネットワーク上のデバイスを自動検出
+- **デバイス識別** - MACアドレスとフィンガープリントからベンダー/モデルを特定
+- **脆弱性チェック** - デフォルトパスワード、開放ポート、古いファームウェアを検出
+- **セキュリティスコア** - 全体的な安全性を0-100のスコアで可視化
+- **日本語レポート** - 専門用語を使わず、わかりやすい結果を表示
+- **改善ガイド** - 問題ごとの具体的な修正手順を案内
 
-### Differentiation
+### 差別化
 
-| Aspect | Existing Tools | IoT Doctor |
-|--------|----------------|------------|
-| Target Users | Security experts | General household users |
-| Language | English-centric | Japanese UI, domestic product support |
-| Scope | Detection only | Detection → Remediation → Education |
-| Usability | CLI / Expert UI | One-click diagnosis |
+| 項目 | 既存ツール | IoT Doctor |
+|---|---|---|
+| 対象ユーザー | セキュリティ専門家 | 一般家庭ユーザー |
+| 言語 | 英語中心 | 日本語UI、国内製品対応 |
+| スコープ | 検出のみ | 検出 → 改善 → 教育 |
+| 使いやすさ | CLI / 専門的なUI | ワンクリック診断 |
 
-## Tech Stack
+## 技術スタック
 
-| Layer | Technology |
-|-------|------------|
-| Framework | Tauri v2 |
-| Frontend | Svelte + TailwindCSS |
-| Backend | Rust |
-| Scan Tools | nmap + rustscan (bundled) |
-| Local DB | SQLite |
-| Target OS | Windows / macOS / Linux |
+| レイヤー | 技術 |
+|---|---|
+| フレームワーク | Tauri v2 |
+| フロントエンド | Svelte + TailwindCSS |
+| バックエンド | Rust |
+| スキャンツール | nmap + rustscan (同梱) |
+| ローカルDB | SQLite |
+| 対象OS | Windows / macOS / Linux |
 
-## Scan Levels
+## スキャンレベル
 
-### Level 1: Passive Information Gathering
-- Device discovery (ARP scan)
-- MAC address vendor identification
-- Hostname detection (mDNS / NetBIOS)
-- OS estimation (TTL analysis)
+### レベル 1: パッシブ情報収集
+- デバイス検出 (ARPスキャン)
+- MACアドレスベンダー識別
+- ホスト名検出 (mDNS / NetBIOS)
+- OS推定 (TTL分析)
 
-### Level 2: Active Scanning
-- Open port detection (TCP SYN scan)
-- Service identification (banner grabbing)
-- Encryption status (TLS/SSL verification)
-- Firmware version detection
+### レベル 2: アクティブスキャン
+- 開放ポート検出 (TCP SYNスキャン)
+- サービス識別 (バナー取得)
+- 暗号化状態 (TLS/SSL検証)
+- ファームウェアバージョン検出
 
-### Level 3: Vulnerability Verification (Requires Consent)
-- Default password check
-- Admin panel access verification
-- Telnet/SSH credential testing
-- UPnP vulnerability probing
+### レベル 3: 脆弱性検証 (同意が必要)
+- デフォルトパスワードチェック
+- 管理パネルアクセス検証
+- Telnet/SSH認証テスト
+- UPnP脆弱性調査
 
-## Project Structure
+## プロジェクト構成
 
 ```
 iot-doctor/
@@ -65,63 +65,63 @@ iot-doctor/
 │   ├── src/
 │   │   ├── main.rs
 │   │   ├── lib.rs
-│   │   ├── scanner/          # Scan logic
-│   │   ├── database/         # DB operations
-│   │   ├── vulndb/           # Vulnerability DB
-│   │   └── report/           # Report generation
-│   └── binaries/             # Bundled nmap, rustscan
+│   │   ├── scanner/          # スキャンロジック
+│   │   ├── database/         # DB操作
+│   │   ├── vulndb/           # 脆弱性DB
+│   │   └── report/           # レポート生成
+│   └── binaries/             # 同梱された nmap, rustscan
 ├── src/
 │   ├── lib/
-│   │   ├── components/       # Svelte components
-│   │   ├── stores/           # State management
+│   │   ├── components/       # Svelteコンポーネント
+│   │   ├── stores/           # 状態管理
 │   │   └── utils/
 │   └── routes/
 ├── package.json
 └── tailwind.config.js
 ```
 
-## Development
+## 開発
 
-### Prerequisites
+### 前提条件
 
 - Node.js 18+
 - Rust 1.70+
 - nmap
 - rustscan
 
-### Setup
+### セットアップ
 
 ```bash
-# Clone repository
+# リポジトリのクローン
 git clone https://github.com/Saku0512/iot-doctor.git
 cd iot-doctor
 
-# Install dependencies
+# 依存関係のインストール
 npm install
 
-# Run in development mode
+# 開発モードで実行
 npm run tauri dev
 
-# Build for production
+# 本番用ビルド
 npm run tauri build
 ```
 
-## Roadmap
+## ロードマップ
 
-- [x] Requirements specification
-- [ ] Tauri project setup
-- [ ] Level 1 implementation (device discovery)
-- [ ] Level 2 implementation (port scanning)
-- [ ] Level 3 implementation (vulnerability verification)
-- [ ] Security scoring system
-- [ ] Japanese report generation
-- [ ] Educational content
-- [ ] Cross-platform builds
+- [x] 要件定義
+- [x] Tauriプロジェクトのセットアップ
+- [ ] レベル 1 実装 (デバイス検出)
+- [ ] レベル 2 実装 (ポートスキャン)
+- [ ] レベル 3 実装 (脆弱性検証)
+- [ ] セキュリティスコアリングシステム
+- [ ] 日本語レポート生成
+- [ ] 教育コンテンツ
+- [ ] クロスプラットフォームビルド
 
-## License
+## ライセンス
 
-TBD
+TBD (未定)
 
-## Team
+## チーム
 
-KOSEN Programming Contest Entry
+高専プロコン参加作品
