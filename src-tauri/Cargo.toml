@@ -26,6 +26,8 @@ mac_address = "1"
 network-interface = "2"
 uuid = { version = "1", features = ["v4"] }
 dirs = "5"
+dns-lookup = "2.0"
+mdns-sd = "0.10"
 
 [profile.release]
 panic = "abort"

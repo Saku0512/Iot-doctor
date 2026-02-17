@@ -10,6 +10,7 @@ use thiserror::Error;
 pub mod arp;
 pub mod ports;
 pub mod fingerprint;
+pub mod mdns;
 
 /// Scan level determining the depth of security analysis
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
@@ -145,21 +146,58 @@ pub async fn scan_network(
 
     // Level 1: Passive scanning
     emit_progress(app, "ネットワークを検索中...", 10);
-    let discovered = arp::discover_devices().await?;
+    
+    // Execute ARP scan and mDNS scan concurrently
+    let (discovered_result, mdns_names): (Result<Vec<(String, String)>, ScanError>, Result<std::collections::HashMap<String, String>, tokio::task::JoinError>) = tokio::join!(
+        arp::discover_devices(),
+        // Run mDNS scan in a blocking thread since mdns-sd is synchronous
+        tokio::task::spawn_blocking(|| {
+            mdns::scan_mdns(std::time::Duration::from_secs(3))
+        })
+    );
+
+    let discovered = discovered_result?;
+    let mdns_map = mdns_names.map_err(|e| ScanError::Internal(e.to_string()))?;
 
     emit_progress(app, "デバイスを識別中...", 30);
     for (ip, mac) in discovered {
         let vendor = fingerprint::lookup_vendor(&mac);
         let device_type = fingerprint::identify_device_type(&mac, &vendor);
+        
+        // Resolve hostname (DNS PTR)
+        let dns_hostname: Option<String> = match ip.parse::<std::net::IpAddr>() {
+            Ok(ip_addr) => dns_lookup::lookup_addr(&ip_addr).ok(),
+            Err(_) => None,
+        };
+
+        // Determine display name
+        // Priority: mDNS Name > DNS Hostname > Vendor Name
+        let m_name = mdns_map.get(&ip).cloned();
+        
+        // If mDNS name is available, it's usually the best "user friendly" name
+        // If not, fall back to DNS hostname
+        // If not, fall back to locally constructed name
+        let name: Option<String> = if let Some(ref m) = m_name {
+            Some(m.clone())
+        } else if let Some(ref h) = dns_hostname {
+            Some(h.clone())
+        } else if let Some(ref v) = vendor {
+            Some(format!("{} Device", v))
+        } else {
+            None
+        };
+        
+        // We can treat mDNS name as hostname if DNS lookup failed
+        let hostname = dns_hostname.or(m_name);
 
         devices.push(Device {
             id: uuid::Uuid::new_v4().to_string(),
-            name: None,
+            name,
             device_type,
             ip,
-            mac,
+            mac, // mac is String
             vendor,
-            hostname: None,
+            hostname,
             open_ports: Vec::new(),
             security_level: SecurityLevel::Unknown,
             security_score: 0,
